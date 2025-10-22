@@ -5,33 +5,80 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Login</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Open+Sans:ital,wght@0,300..800;1,300..800&family=Quicksand:wght@300..700&family=Racing+Sans+One&display=swap" rel="stylesheet">
+
     <link rel="stylesheet" href="../css/login.css">
+
+    <script>
+        document.addEventListener("DOMContentLoaded", () => {
+            const loginTab = document.getElementById("loginTab");
+            const registerTab = document.getElementById("registerTab");
+            const loginForm = document.getElementById("loginForm");
+            const registerForm = document.getElementById("registerForm");
+            const indicator = document.querySelector(".tab-indicator");
+
+            loginTab.addEventListener("click", () => {
+                loginTab.classList.add("active");
+                registerTab.classList.remove("active");
+                loginForm.classList.add("active");
+                registerForm.classList.remove("active");
+                indicator.style.transform = "translateX(0%)";
+            });
+
+            registerTab.addEventListener("click", () => {
+                registerTab.classList.add("active");
+                loginTab.classList.remove("active");
+                registerForm.classList.add("active");
+                loginForm.classList.remove("active");
+                indicator.style.transform = "translateX(100%)";
+            });
+        });
+
+    </script>
 </head>
 
 <body>
+    <div id="blueBack">
+        <svg viewBox="0 0 1440 320" class="wave">
+            <path fill="#0b5884" d="M0,160L120,165C240,170,480,180,720,170C960,160,1200,130,1320,120L1440,110V320H0Z"></path>
+        </svg>
+    </div>
 
     <div class="maincontent">
-        <div class="formRow">
-            <h1>LOGIN</h1>
-            <form id="loginForm">
-                <label>Username: </label> <input type="text" placeholder="Enter username..." required id="loginUsername">
-                <label>Password: </label> <input type="password" placeholder="Enter password..." required id="loginPassword">
-                <input type="submit" value="Login" id="loginSubmit">
+        <img src="../clockImg.png" alt="clock">
+
+        <div class="tab-header">
+            <div class="tab-indicator"></div>
+            <div class="tab active" id="loginTab">Login</div>
+            <div class="tab" id="registerTab">Register</div>
+        </div>
+
+        <div class="form-container">
+            <form id="loginForm" class="form active">
+                <input type="text" id="loginUsername" placeholder="Username:" required>
+
+                <input type="password" id="loginPassword" placeholder="Password:" required>
+
+                <input type="submit" value="Login">
+            </form>
+
+            <form id="registerForm" class="form">
+                <input type="text" id="regUsername" placeholder="Username:" required>
+
+                <input type="password" id="regPassword" placeholder="Password:" required>
+
+                <input type="submit" value="Register">
             </form>
         </div>
 
-        <div class="formRow">
-            <h1>REGISTER</h1>
-            <form id="registerForm">
-                <label>Username: </label> <input type="text" placeholder="Enter username..." required id="regUsername">
-                <label>Password: </label> <input type="password" placeholder="Enter password..." required id="regPassword">
-                <input type="submit" value="Register" id="registerSubmit">
-            </form>
+        <div id="error">
         </div>
+
     </div>
-    
-    <div id="error">
-    </div>
+
     <script src="../js/login.js"></script>
 </body>
 
