@@ -1,5 +1,6 @@
 <?php
 require_once __DIR__ . '/../includes/Database.php';
+require_once __DIR__ . '/../../vendor/autoload.php';
 
 header('Content-Type: application/json');
 header('Access-Control-Allow-Origin: *');
@@ -24,12 +25,22 @@ class AuthController {
     }
 
     public static function login() {
+        
+        $conn = Database::connect();
+        $response = ['success' => false, 'message' => '', 'token' => ''];
+        
         $data = json_decode(file_get_contents('php://input'), true);
         $username = $data['username'] ?? '';
         $password = $data['password'] ?? '';
+        
+        $dotenv = Dotenv\Dotenv::createImmutable(__DIR__ . "/../..");
+        $dotenv->load();
+        $secret = $_ENV['JWT_SECRET'];
 
-        // DB check, JWT generation
-        echo json_encode(['success' => true, 'token' => 'JWT_HERE']);
+        self::sanitiseInputs($response, $username, $password);
+        self::authenticateUser($conn, $response, $username, $password, $secret);
+        
+        echo json_encode($response);
     }
     
     
@@ -77,6 +88,70 @@ class AuthController {
         }
         
         mysqli_stmt_close($stmt);
+    }
+    
+    private static function authenticateUser($conn, &$response, $username, $password, $secret) {
+        $stmt = $conn->prepare("SELECT userId, password_hash FROM Users WHERE username = ?");
+        if ($stmt === false) {
+            http_response_code(500);
+            $response['message'] = 'DB error ';
+            return;
+        }
+        
+        $stmt->bind_param("s", $username);
+        $stmt->execute();
+        $stmt->bind_result($id, $storedPass);
+        
+        if($stmt->fetch()) {
+            $stmt->close();
+            if(password_verify($password, $storedPass)) {
+                
+                $response['success'] = true;
+                $response['message'] = "Successful login";
+                
+                self::createjwt($id, $username, $secret, $response);
+                
+            } else {
+                http_response_code(401);
+                $response['message'] = "Username or password incorrect";
+            }
+        } else {
+            http_response_code(401);
+            $response['message'] = "Username or password incorrect";
+            $stmt->close();
+        }
+        
+    }
+    
+    private static function createjwt($id, $username, $secret, &$response) {
+        $payload = [
+            "id"=>$id,
+            "username"=>$username,
+            "iat"=>time(),
+            "exp"=>time()+3600
+        ];
+        
+        $jwt = self::makeJWT($payload, $secret);
+        $response['token'] = $jwt;
+    }
+    
+    private static function makeJWT($payload, $secret) {
+        $header = json_encode([
+            'alg' => 'HS256',
+            'typ' => 'JWT'
+        ]);
+        
+        $base64Header = self::base64UrlEncode($header);
+        $base64Payload = self::base64UrlEncode(json_encode($payload));
+        
+        $signature = hash_hmac('sha256', $base64Header . "." . $base64Payload, $secret, true);
+        $base64Signature = self::base64UrlEncode($signature);
+        
+        return $base64Header . "." . $base64Payload . "." . $base64Signature;
+    }
+    
+    private static function base64UrlEncode($data) {
+        return rtrim(strtr(base64_encode($data), '+/', '-_'), '=');
     }
 }
 ?>

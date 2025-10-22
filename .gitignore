@@ -1,1 +1,5 @@
 config.local.php
+
+/vendor/
+
+.env
