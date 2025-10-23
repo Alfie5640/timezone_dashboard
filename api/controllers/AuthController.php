@@ -19,6 +19,7 @@ class AuthController {
         self::sanitiseInputs($response, $username, $password);
         $hashedPass = self::hashPassword($password);
         
+        self::checkExists($conn, $response, $username);
         self::addUser($conn, $response, $username, $hashedPass);
         
         echo json_encode($response);
@@ -62,6 +63,27 @@ class AuthController {
         }
     }
         
+    private static function checkExists($conn, &$response, $username) {
+        $stmt = $conn->prepare("SELECT 1 FROM Users WHERE username = ? LIMIT 1");
+        if ($stmt === false) {
+            http_response_code(500);
+            $response['message'] = 'DB error ';
+            return;
+        }
+        
+        $stmt->bind_param("s", $username);
+        $stmt->execute();
+        $stmt->store_result();
+        $exists = $stmt->num_rows > 0;
+        $stmt->close();
+        
+        if ($exists) {
+            $response['message'] = "Username already exists.";
+            echo(json_encode($response));
+            exit;
+        }
+    }
+    
     private static function hashPassword($password) {
         return password_hash($password, PASSWORD_DEFAULT);
     }
