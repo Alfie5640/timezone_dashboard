@@ -44,6 +44,48 @@ class AuthController {
         echo json_encode($response);
     }
     
+    public static function decode() {
+        require_once __DIR__ . '/../../vendor/autoload.php';
+        
+        $dotenv = Dotenv\Dotenv::createImmutable(__DIR__ . "/../..");
+        $dotenv->load();
+        $secret = $_ENV['JWT_SECRET'];
+
+
+        header('Content-Type: application/json'); 
+
+        $response = ['success' => false, 'message' => '', 'username' => ''];
+
+        $headers = getallheaders();
+        $token = null;
+
+        if (isset($headers['Authorization']) && preg_match('/Bearer\s(\S+)/', $headers['Authorization'], $matches)) {
+            $token = $matches[1];
+        }
+
+        if (!$token) {
+            http_response_code(401);
+            $response['message'] = 'No token provided';
+            echo json_encode($response);
+            exit;
+        }
+        
+        $payload = self::verifyJWT($token, $secret);
+
+
+        if ($payload) {
+            $response['success'] = true;
+            $response['username'] = $payload['username'];
+        } else {
+            $response['message'] = 'Invalid or expired token';
+        }
+
+        echo json_encode($response);
+    }
+    
+    
+    // -------------------------------- HELPER FUNCTIONS
+    
     
     private static function sanitiseInputs(&$response, $username, $password) {
         if ($username != filter_var($username, FILTER_SANITIZE_STRING)) {
@@ -174,6 +216,35 @@ class AuthController {
     
     private static function base64UrlEncode($data) {
         return rtrim(strtr(base64_encode($data), '+/', '-_'), '=');
+    }
+    
+    
+    private static function base64UrlDecode($data) {
+        
+    $remainder = strlen($data) % 4;
+    if ($remainder) $data .= str_repeat('=', 4 - $remainder);
+    return base64_decode(strtr($data, '-_', '+/'));
+        
+    }
+
+    
+    private static function verifyJWT($jwt, $secret) {
+        
+        $parts = explode('.', $jwt);
+        if (count($parts) !== 3) return false;
+
+        list($header64, $payload64, $signature64) = $parts;
+
+        $signature = hash_hmac('sha256', "$header64.$payload64", $secret, true);
+        $expectedSig = rtrim(strtr(base64_encode($signature), '+/', '-_'), '=');
+
+        if (!hash_equals($expectedSig, $signature64)) return false;
+
+        $payload = json_decode(self::base64UrlDecode($payload64), true);
+        if (!$payload || !isset($payload['exp']) || $payload['exp'] < time()) return false;
+
+        return $payload;
+        
     }
 }
 ?>

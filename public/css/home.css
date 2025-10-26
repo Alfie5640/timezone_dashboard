@@ -1,0 +1,165 @@
+html,
+body {
+    height: 100%;
+    width: 100%;
+    overflow: hidden;
+    margin: 0;
+    padding: 0;
+    font-family: "Quicksand", sans-serif;
+
+}
+
+#header {
+    height: 30%;
+    font-size: 30px;
+    display: flex;
+    align-items: center;
+    margin-left: 40px;
+    gap: 65%;
+}
+
+.maincontent {
+    margin-top: 80px;
+    height: 68%;
+    width: 100%;
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+}
+
+
+#blueBack {
+    position: absolute;
+    bottom: 0;
+    height: 67%;
+    background-color: #0b5884;
+    width: 100%;
+    z-index: -1;
+}
+
+.wave {
+    position: absolute;
+    top: -240px;
+    left: 0;
+    width: 100%;
+    height: auto;
+    transform: scaleX(-1);
+    display: block;
+    overflow: visible;
+}
+
+.timezoneElement {
+  height: 45%;
+  width: 24%;
+  background-color: white;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+  border-radius: 3px;
+  margin-left: 30px;
+  display: block; 
+}
+
+.timezoneElement:has(#addButton) {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+#addButton {
+    width: 50px;
+    height: 50px;
+    border-radius: 55px;
+    font-size: 50px;
+    text-align: center;
+    color: white;
+    border: none;
+    padding: 0px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+    transition: background-color 0.2s;
+    background-color: deepskyblue;
+}
+
+#addButton:hover {
+    background-color:#0095CC;
+}
+
+
+
+#hiddenForm {
+  flex-direction: column;
+  justify-content: space-between;
+  align-items: flex-start;
+  padding: 20px;
+  box-sizing: border-box;
+  gap: 15px;
+}
+
+/* headline */
+#hiddenForm h1 {
+  margin: 0;
+  font-size: 24px;
+  color: #0b5884;
+  align-self: center;
+}
+
+/* form element wrappers */
+.formElement {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  gap: 5px;
+}
+
+/* labels */
+.formElement label {
+  font-weight: 600;
+  font-size: 16px;
+  color: #0b5884;
+}
+
+/* inputs/select/textarea */
+#hiddenForm select,
+#hiddenForm textarea,
+#hiddenForm input[type="text"] {
+  width: 100%;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  padding: 8px 10px;
+  font-family: "Quicksand", sans-serif;
+  font-size: 15px;
+  box-sizing: border-box;
+}
+
+#hiddenForm select:focus,
+#hiddenForm textarea:focus {
+  outline: none;
+  border-color: #0095CC;
+  box-shadow: 0 0 4px rgba(0, 149, 204, 0.5);
+}
+
+/* textarea sizing */
+#timezoneDescription {
+  resize: none;
+  min-height: 40px;
+}
+
+/* submit button */
+#submitButton {
+  align-self: center;
+  color: white;
+  width: 50%;
+  height: 65px;
+  background-color: deepskyblue;
+  border-radius: 7px;
+  border: none;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+#submitButton:hover {
+  background-color: #0095CC;
+}
