@@ -24,7 +24,7 @@ async function addTimezone() {
                     "Content-Type": "application/json",
                     "Authorization": `Bearer ${token}`
                 },
-                body: JSON.Stringify({
+                body: JSON.stringify({
                     timezone: timezone,
                     description: description
                 })
@@ -34,7 +34,9 @@ async function addTimezone() {
 
             if (data.success) {
                 
+            } 
+            
             } catch (err) {
                 console.log(err);
             }
-        }
+}
