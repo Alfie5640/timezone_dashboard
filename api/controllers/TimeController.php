@@ -16,16 +16,21 @@ class TimeController {
         $data = json_decode(file_get_contents('php://input'), true);
         
         $payload = self::getPayload($response);
-        $username = $payload['username'];
+        $userId = $payload['id'];
         
         
         $timezone = $data['timezone'];
-        $desc = $data['desc'];
+        $desc = $data['description'];
         
         
-        self::sanitiseInputs($response, $desc);        
-        self::addTimezone($conn, $response, $timezone, $desc, $username);
+        self::sanitiseInputs($response, $desc);
         
+        //Get timezone Id, insert userId, timezoneId into user_timezones
+        $timezoneId = self::getTimezoneId($conn, $response, $timezone);
+        
+        self::connectTimezone($conn, $response, $desc, $userId, $timezoneId);
+        
+        echo(json_encode($response));
     }
     
     private static function sanitiseInputs(&$response, $desc) {
@@ -40,6 +45,11 @@ class TimeController {
     
     private static function getPayload(&$response) {
         $token = JwtHelper::getBearerToken();
+        
+        $dotenv = Dotenv\Dotenv::createImmutable(__DIR__ . "/../..");
+        $dotenv->load();
+        $secret = $_ENV['JWT_SECRET'];
+        
         if (!$token) {
             http_response_code(401);
             $response['message'] = 'No token provided';
@@ -49,8 +59,7 @@ class TimeController {
 
         $payload = JwtHelper::verifyJWT($token, $secret);
         if ($payload) {
-            $response['success'] = true;
-            $response['username'] = $payload['username'];
+            return $payload;
         } else {
             http_response_code(401);
             $response['message'] = 'Invalid or expired token';
@@ -59,8 +68,42 @@ class TimeController {
         return $payload;
     }
     
-    private static function addTimezone($conn, $response, $timezone, $desc, $username) {
+    private static function getTimezoneId($conn, &$response, $timezone) {
+        $stmt = $conn->prepare("SELECT id FROM timezones WHERE name = ?");
+    
+        $stmt->bind_param('s', $timezone);
+        $stmt->execute();
+        $stmt->bind_result($timezoneId);
+
+        if ($stmt->fetch()) {  
+            $stmt->close();
+            return $timezoneId;
+        } else {
+            $response['message'] = "Unable to find timezone";
+            echo(json_encode($response));
+            exit;
+        }
+    }
+    
+    private static function connectTimezone($conn, &$response, $desc, $userId, $timezoneId) {
+        $stmt = $conn->prepare("INSERT INTO user_timezones (userId, timezoneId, description) VALUES (?, ?, ?)");
         
+        if (!$stmt) {
+            http_response_code(500);
+            $response['message'] = "Database error";
+            echo json_encode($response);
+            exit;
+        }
+        
+        $stmt->bind_param('iis', $userId, $timezoneId, $desc);
+        if($stmt->execute()) {
+            $response['success'] = true;
+            $response['message'] = "Timezone Added.";
+            $stmt->close();
+        } else {
+            $response['message'] = "Failed to Add timezone";
+            $stmt->close();
+        }
     }
     
 }

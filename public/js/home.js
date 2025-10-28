@@ -33,8 +33,10 @@ async function addTimezone() {
             const data = await response.json();
 
             if (data.success) {
-                
-            } 
+                alert("timezone added");
+            } else {
+                alert(data.message);
+            }
             
             } catch (err) {
                 console.log(err);
