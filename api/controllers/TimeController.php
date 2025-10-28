@@ -38,7 +38,7 @@ class TimeController {
     
     public static function loadTimezones() {
         $conn = Database::connect();
-        $response = ['success' => false, 'message' => '', 'timezone' => [], 'offset' => []];
+        $response = ['success' => false, 'message' => '', 'timezone' => [], 'offset' => [], 'descriptions' => []];
         
         $payload = self::getPayload($response);
         $userId = $payload['id'];
@@ -93,17 +93,21 @@ class TimeController {
     }
     
     private static function loadTimezoneIds($conn, &$response, $userId) {
-        $stmt = $conn->prepare("SELECT timezoneId FROM user_timezones WHERE userId = ?");
+        $stmt = $conn->prepare("SELECT timezoneId, description FROM user_timezones WHERE userId = ?");
         
         $stmt->bind_param('i', $userId);
         $stmt->execute();
-        $stmt->bind_result($timezoneId);
+        $stmt->bind_result($timezoneId, $description);
         
         $timezones = [];
+        $descriptions = [];
         
         while ($stmt->fetch()) {
             array_push($timezones, $timezoneId);
+            array_push($descriptions, $description);
         }
+        
+        $response['descriptions'] = $descriptions;
         
         $stmt->close();
         return $timezones;

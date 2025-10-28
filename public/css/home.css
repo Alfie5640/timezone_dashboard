@@ -50,7 +50,7 @@ body {
 
 .timezoneElement {
   height: 45%;
-  width: 24%;
+  width: 23%;
   background-color: white;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
   border-radius: 3px;
@@ -62,6 +62,10 @@ body {
   display: flex;
   justify-content: center;
   align-items: center;
+}
+
+.timezoneElement h1, .timezoneElement h2, .timezoneElement p {
+    margin: 10px;
 }
 
 #addButton {
