@@ -9,7 +9,7 @@ $router->add('POST', '/api/register', [AuthController::class, 'register']);
 $router->add('POST', '/api/login', [AuthController::class, 'login']);
 $router->add('POST', '/api/decode', [AuthController::class, 'decode']);
 $router->add("POST", '/api/timezone', [TimeController::class, 'addTimezone']);
-//$router->add("GET", '/api/timezone', [TimeController::class, 'loadTimezones']);
+$router->add("GET", '/api/timezone', [TimeController::class, 'loadTimezones']);
 
 $router->dispatch();
 

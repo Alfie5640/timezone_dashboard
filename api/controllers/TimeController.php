@@ -30,6 +30,36 @@ class TimeController {
         
         self::connectTimezone($conn, $response, $desc, $userId, $timezoneId);
         
+        $response['success'] = true;
+        $response['message'] = "timezones loaded";
+        
+        echo(json_encode($response));
+    }
+    
+    public static function loadTimezones() {
+        $conn = Database::connect();
+        $response = ['success' => false, 'message' => '', 'timezone' => [], 'offset' => []];
+        
+        $payload = self::getPayload($response);
+        $userId = $payload['id'];
+        
+        //Get timezoneId's associated with userId
+        $timezones = self::loadTimezoneIds($conn, $response, $userId);
+        
+        
+        if (empty($timezones)) {
+            // No timezones saved yet
+            $response['success'] = true;
+            $response['message'] = "No timezones found for this user.";
+            echo json_encode($response);
+            return;
+        }
+        
+        //Get timezone names, offset associates with timzone Ids
+        self::getTimezoneInfo($conn, $response, $timezones);
+        
+        $response['success'] = true;
+        
         echo(json_encode($response));
     }
     
@@ -42,6 +72,43 @@ class TimeController {
             exit;
         }
     }
+    
+    private static function getTimezoneInfo($conn, &$response, $timezones) {
+        //Loop through each timezone id and push response array with corrolary info
+        for ($i=0; $i < count($timezones); $i++) {
+            
+            $stmt = $conn->prepare("SELECT name, `offset` FROM timezones WHERE id = ?");
+            
+            $stmt->bind_param('i', $timezones[$i]);
+            $stmt->execute();
+            $stmt->bind_result($name, $offset);
+            
+            if($stmt->fetch()) {
+                array_push($response['timezone'], $name);
+                array_push($response['offset'], $offset);
+            }
+            
+            $stmt->close();
+        }
+    }
+    
+    private static function loadTimezoneIds($conn, &$response, $userId) {
+        $stmt = $conn->prepare("SELECT timezoneId FROM user_timezones WHERE userId = ?");
+        
+        $stmt->bind_param('i', $userId);
+        $stmt->execute();
+        $stmt->bind_result($timezoneId);
+        
+        $timezones = [];
+        
+        while ($stmt->fetch()) {
+            array_push($timezones, $timezoneId);
+        }
+        
+        $stmt->close();
+        return $timezones;
+    }
+    
     
     private static function getPayload(&$response) {
         $token = JwtHelper::getBearerToken();
