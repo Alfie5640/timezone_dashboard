@@ -17,11 +17,14 @@
     <div id="header">
         <div id="username">
             <h1 id="name"></h1>
+            
+            <h1 id="time">
+            </h1>
         </div>
-        <h1 id="time">
-        </h1>
+        
+        <button id="logoutButton">Logout</button>
     </div>
-
+    
     <div class="maincontent">
         <!-- Added timezone elements go here -->
 
@@ -53,6 +56,7 @@
              L1440,320 L0,320 Z" />
         </svg>
     </div>
+
     <script>
         {
             const token = localStorage.getItem("jwt");

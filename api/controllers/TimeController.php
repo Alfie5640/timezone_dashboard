@@ -63,6 +63,25 @@ class TimeController {
         echo(json_encode($response));
     }
     
+    public static function deleteTimezone($tzName) {
+        $tzName = urldecode($tzName);
+        
+        $conn = Database::connect();
+        $response = ['success' => false, 'message' => ''];
+        
+        $payload = self::getPayload($response);
+        $userId = $payload['id'];
+        
+        //We have name to delete and userId
+        $timezoneId = self::getTimezoneId($conn, $response, $tzName);
+        
+        self::deleteFromUserTimezone($conn, $response, $timezoneId, $userId);
+        
+        echo(json_encode($response));
+    }
+    
+//HELPER FUNCTIONS ------------------------------------
+    
     private static function sanitiseInputs(&$response, $desc) {
         if ($desc != filter_var($desc, FILTER_SANITIZE_STRING)) {
             http_response_code(400);
@@ -70,6 +89,27 @@ class TimeController {
             $response['success'] = false;
             echo json_encode($response);
             exit;
+        }
+    }
+    
+    private static function deleteFromUserTimezone($conn, &$response, $timezoneId, $userId) {
+        $stmt = $conn->prepare("DELETE FROM user_timezones WHERE timezoneId = ? AND userId = ?");
+        
+        if (!$stmt) {
+            http_response_code(500);
+            $response['message'] = "Database error";
+            echo json_encode($response);
+            exit;
+        }
+        
+        $stmt->bind_param('ii', $timezoneId, $userId);
+        if($stmt->execute()) {
+            $response['success'] = true;
+            $response['message'] = "Timezone Deleted.";
+            $stmt->close();
+        } else {
+            $response['message'] = "Failed to Add timezone";
+            $stmt->close();
         }
     }
     

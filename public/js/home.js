@@ -33,7 +33,18 @@ async function addTimezone() {
         const data = await response.json();
 
         if (data.success) {
-            alert("timezone added");
+            alert("Timezone added!");
+
+            // Clear the form
+            document.getElementById("timezoneDescription").value = "";
+            document.getElementById("hiddenForm").style.display = "none";
+
+            // Clear existing timezones
+            const container = document.querySelector(".maincontent");
+            const timezoneElements = Array.from(container.querySelectorAll(".timezoneElement")).slice(2); // skip first two
+            timezoneElements.forEach(el => el.remove());
+
+            await loadTimezones();
         } else {
             alert(data.message);
         }
@@ -79,11 +90,16 @@ async function loadTimezones() {
 
                 const description = document.createElement("p");
                 description.textContent = desc;
+                
+                const delButton = document.createElement("button");
+                delButton.textContent = 'x';
+                delButton.addEventListener("click", () => deleteTimezone(tzName));
 
                 tzElement.appendChild(title);
                 tzElement.appendChild(utcOffset);
                 tzElement.appendChild(localTime);
                 tzElement.appendChild(description);
+                tzElement.appendChild(delButton);
                 container.appendChild(tzElement);
 
                 // Initialize and keep updating the displayed local time
@@ -100,7 +116,6 @@ async function loadTimezones() {
     }
 }
 
-// Helper: display current local time for a timezone
 function updateLocalTime(element, tzName) {
     const now = new Date();
     try {
@@ -114,5 +129,45 @@ function updateLocalTime(element, tzName) {
     }
 }
 
+
+async function deleteTimezone(tzName) {
+    try {
+        const token = localStorage.getItem("jwt");
+    
+        const response = await fetch(`/api/timezone/${encodeURIComponent(tzName)}`, {
+            method: "DELETE",
+            headers: {
+                "Content-Type": "application/json",
+                "Authorization": `Bearer ${token}`
+            }
+        });
+    
+        const data = await response.json();
+        
+        if (data.success) {
+            alert("Successfully deleted timezone");
+            
+            // Remove the matching timezone element from the DOM
+            document.querySelectorAll(".timezoneElement h1").forEach(h1 => {
+                if (h1.textContent === tzName) {
+                    h1.parentElement.remove();
+                }
+            });
+        } else {
+            console.log(data.message);
+        }
+
+    } catch (err) {
+        console.error(err);
+    }
+}
+                                                                    
+    
+
+
+document.getElementById("logoutButton").addEventListener("click", () => {
+    localStorage.removeItem("jwt");    
+    window.location.href = "/html/login.php";
+});
 
 loadTimezones();

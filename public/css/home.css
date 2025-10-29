@@ -9,12 +9,20 @@ body {
 
 }
 
+#username {
+    width: 40%;
+    flex-direction: row;
+    display: flex;
+    justify-content: space-between;
+}
+
 #header {
     height: 30%;
     font-size: 30px;
     display: flex;
     align-items: center;
     margin-left: 40px;
+    margin-right: 40px;
     gap: 65%;
 }
 
@@ -25,6 +33,23 @@ body {
     display: flex;
     flex-direction: row;
     flex-wrap: wrap;
+}
+
+#logoutButton {
+    background-color: deepskyblue;
+    color: white;
+    border: none;
+    width: 160px;
+    height: 60px;
+    padding: 10px 18px;
+    border-radius: 8px;
+    font-size: 16px;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+#logoutButton:hover {
+    background-color: #0095CC;
 }
 
 
@@ -64,8 +89,22 @@ body {
   align-items: center;
 }
 
-.timezoneElement h1, .timezoneElement h2, .timezoneElement p {
+.timezoneElement h1, .timezoneElement h2, .timezoneElement p, .timezoneElement button {
     margin: 10px;
+}
+
+.timezoneElement button {
+    color: white;
+    width: 30px;
+    height: 30px;
+    background-color: deepskyblue;
+    border: none;
+    transition: background-color 0.2s;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+.timezoneElement button:hover {
+    background-color:#0095CC;
 }
 
 #addButton {

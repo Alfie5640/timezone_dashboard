@@ -18,17 +18,21 @@ class Router {
         foreach ($this->routes as $route) {
             if ($route['method'] !== $requestMethod) {
                 continue;
-            }
+            }   
 
-            if (preg_match("#^{$route['pattern']}$#", $requestUri, $matches)) {
-                array_shift($matches); 
+            // Convert {param} placeholders into regex groups
+            $pattern = preg_replace('#\{([a-zA-Z0-9_]+)\}#', '([^/]+)', $route['pattern']);
+            $pattern = "#^" . $pattern . "$#";
+
+            if (preg_match($pattern, $requestUri, $matches)) {
+                array_shift($matches);
                 $handler = $route['handler'];
 
                 if (is_array($handler)) {
                     $class = $handler[0];
                     $method = $handler[1];
                     if (method_exists($class, $method)) {
-                        call_user_func_array([$class, $method], $matches);
+                        call_user_func_array([new $class, $method], $matches);
                         return;
                     }
                 } elseif (is_callable($handler)) {
@@ -40,7 +44,7 @@ class Router {
                 echo json_encode(['message' => 'Handler not found']);
                 return;
             }
-        }
+        }   
 
         http_response_code(404);
         echo json_encode(['message' => 'Not found']);
