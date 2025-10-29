@@ -88,18 +88,53 @@ async function loadTimezones() {
                 const localTime = document.createElement("h2");
                 localTime.classList.add("localTime");
 
-                const description = document.createElement("p");
+                let description = document.createElement("p");
                 description.textContent = desc;
-                
+
                 const delButton = document.createElement("button");
                 delButton.textContent = 'x';
                 delButton.addEventListener("click", () => deleteTimezone(tzName));
+
+                const updateButton = document.createElement("button");
+                updateButton.textContent = "🖊️";
+                updateButton.addEventListener("click", () => {
+                    const input = document.createElement("input");
+                    input.type = "text";
+                    input.value = description.textContent;
+                    input.placeholder = "Enter new description";
+                    input.classList.add("edit-input");
+
+                    // Replace the description with the input temporarily
+                    description.replaceWith(input);
+                    input.focus();
+
+                    // When user presses Enter , update description
+                    input.addEventListener("keydown", async (e) => {
+                        if (e.key === "Enter") {
+                            const newDescription = input.value.trim();
+
+                            const success = await updateDescription(tzName, newDescription);
+                            if (success) {
+                                // Replace input back with updated text
+                                const newDesc = document.createElement("p");
+                                newDesc.textContent = newDescription;
+                                input.replaceWith(newDesc);
+                                description.textContent = newDescription;
+                                description = newDesc;
+                            } else {
+                                // If failed, revert to old description
+                                input.replaceWith(description);
+                            }
+                        }
+                    });
+                });
 
                 tzElement.appendChild(title);
                 tzElement.appendChild(utcOffset);
                 tzElement.appendChild(localTime);
                 tzElement.appendChild(description);
                 tzElement.appendChild(delButton);
+                tzElement.appendChild(updateButton);
                 container.appendChild(tzElement);
 
                 // Initialize and keep updating the displayed local time
@@ -133,7 +168,7 @@ function updateLocalTime(element, tzName) {
 async function deleteTimezone(tzName) {
     try {
         const token = localStorage.getItem("jwt");
-    
+
         const response = await fetch(`/api/timezone/${encodeURIComponent(tzName)}`, {
             method: "DELETE",
             headers: {
@@ -141,12 +176,12 @@ async function deleteTimezone(tzName) {
                 "Authorization": `Bearer ${token}`
             }
         });
-    
+
         const data = await response.json();
-        
+
         if (data.success) {
             alert("Successfully deleted timezone");
-            
+
             // Remove the matching timezone element from the DOM
             document.querySelectorAll(".timezoneElement h1").forEach(h1 => {
                 if (h1.textContent === tzName) {
@@ -161,12 +196,42 @@ async function deleteTimezone(tzName) {
         console.error(err);
     }
 }
-                                                                    
-    
+
+async function updateDescription(tzName, desc) {
+    try {
+        const token = localStorage.getItem("jwt");
+        
+        const response = await fetch(`/api/timezone/${encodeURIComponent(tzName)}`, {
+            method: "PUT",
+            headers: {
+                "Content-Type": "application/json",
+                "Authorization": `Bearer ${token}`
+            },
+            body: JSON.stringify({
+                desc: desc
+            })
+        });
+        
+        const data = await response.json();
+        
+        if (data.success) {
+            console.log(data.message);
+            return true;
+        } else {
+            return false;
+        }
+        
+    } catch(err) {
+        console.log(err);
+        return false;
+    }
+}
+
+
 
 
 document.getElementById("logoutButton").addEventListener("click", () => {
-    localStorage.removeItem("jwt");    
+    localStorage.removeItem("jwt");
     window.location.href = "/html/login.php";
 });
 

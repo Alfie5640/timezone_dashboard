@@ -80,6 +80,26 @@ class TimeController {
         echo(json_encode($response));
     }
     
+    public static function updateDescription($tzName) {
+        $tzName = urldecode($tzName);
+        
+        $conn = Database::connect();
+        $response = ['success' => false, 'message' => ''];
+        
+        $payload = self::getPayload($response);
+        $userId = $payload['id'];
+        
+        $timezoneId = self::getTimezoneId($conn, $response, $tzName);
+        
+        //We have timezone id, userId -> get new description from body then update
+        $data = json_decode(file_get_contents('php://input'), true);
+        
+        $newDesc = $data['desc'];
+        self :: alterDesc($conn, $response, $userId, $timezoneId, $newDesc);
+        
+        echo(json_encode($response));
+    }
+    
 //HELPER FUNCTIONS ------------------------------------
     
     private static function sanitiseInputs(&$response, $desc) {
@@ -89,6 +109,28 @@ class TimeController {
             $response['success'] = false;
             echo json_encode($response);
             exit;
+        }
+    }
+    
+    private static function alterDesc($conn, &$response, $userId, $timezoneId, $newDesc) {
+        $stmt = $conn->prepare("UPDATE user_timezones SET description = ? WHERE userId = ? AND timezoneId = ?");
+        
+        if(!$stmt) {
+            http_response_code(500);
+            $response['message'] = "DB error";
+            echo(json_encode($response));
+            exit;
+        }
+        
+        $stmt->bind_param('sii', $newDesc, $userId, $timezoneId);
+        
+        if ($stmt->execute()) {
+            $response['message'] = "Description Updated";
+            $response['success'] = true;
+            $stmt->close();
+        } else {
+            $response['message'] = "Failed to update db";
+            $stmt->close();
         }
     }
     
