@@ -22,7 +22,9 @@
             </h1>
         </div>
         
-        <button id="logoutButton">Logout</button>
+        <div id="logoutContainer">
+            <button id="logoutButton">Logout</button>
+        </div>
     </div>
     
     <div class="maincontent">
@@ -47,14 +49,6 @@
             <input type="submit" value="SUBMIT" id="submitButton" onclick="addTimezone()">
         </div>
 
-    </div>
-
-    <div id="blueBack">
-        <svg viewBox="0 0 1440 320" preserveAspectRatio="xMinYMax meet" class="wave" xmlns="http://www.w3.org/2000/svg">
-            <path fill="#0b5884" d="M0,160 
-             C360,100 1080,220 1440,160 
-             L1440,320 L0,320 Z" />
-        </svg>
     </div>
 
     <script>

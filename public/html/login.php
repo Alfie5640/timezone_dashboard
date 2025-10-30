@@ -41,11 +41,6 @@
 </head>
 
 <body>
-    <div id="blueBack">
-        <svg viewBox="0 0 1440 320" class="wave">
-            <path fill="#0b5884" d="M0,160L120,165C240,170,480,180,720,170C960,160,1200,130,1320,120L1440,110V320H0Z"></path>
-        </svg>
-    </div>
 
     <div class="maincontent">
         <img src="../clockImg.png" alt="clock">
