@@ -38,6 +38,7 @@ body {
     display: flex;
     align-items: center;
     overflow-x: auto;
+    justify-content: flex-start;
     scroll-snap-type: x mandatory; /* snap scrolling */
 }
 

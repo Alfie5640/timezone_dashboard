@@ -129,17 +129,38 @@ async function loadTimezones() {
                     });
                 });
 
-                tzElement.appendChild(title);
-                tzElement.appendChild(utcOffset);
-                tzElement.appendChild(localTime);
-                tzElement.appendChild(description);
-                tzElement.appendChild(delButton);
-                tzElement.appendChild(updateButton);
-                container.appendChild(tzElement);
+                var mediaQuery = window.matchMedia("(max-width: 700px)");
 
+                if (mediaQuery.matches) {
+                    const titleText = title.textContent;
+
+                    const newTitleText = titleText.split("/").pop();
+
+                    const newTitle = document.createElement("h1");
+                    newTitle.textContent = newTitleText;
+
+                    tzElement.appendChild(newTitle);
+                    tzElement.appendChild(delButton);
+                    tzElement.appendChild(updateButton);
+                    tzElement.appendChild(description);
+                    tzElement.style.overflow = "hidden";
+                    tzElement.style.width = "50%";
+                    container.appendChild(tzElement);
+                } else {
+                    tzElement.appendChild(title);
+                    tzElement.appendChild(utcOffset);
+                    tzElement.appendChild(localTime);
+                    tzElement.appendChild(description);
+                    tzElement.appendChild(delButton);
+                    tzElement.appendChild(updateButton);
+                    tzElement.style.overflow = "hidden";
+                    container.appendChild(tzElement);
+                };
+                
                 // Initialize and keep updating the displayed local time
-                updateLocalTime(localTime, tzName);
-                setInterval(() => updateLocalTime(localTime, tzName), 1000);
+                    updateLocalTime(localTime, tzName);
+                    setInterval(() => updateLocalTime(localTime, tzName), 1000);
+
             }
         } else {
             console.error("Failed to load timezones:", data.message);
@@ -200,7 +221,7 @@ async function deleteTimezone(tzName) {
 async function updateDescription(tzName, desc) {
     try {
         const token = localStorage.getItem("jwt");
-        
+
         const response = await fetch(`/api/timezone/${encodeURIComponent(tzName)}`, {
             method: "PUT",
             headers: {
@@ -211,17 +232,17 @@ async function updateDescription(tzName, desc) {
                 desc: desc
             })
         });
-        
+
         const data = await response.json();
-        
+
         if (data.success) {
             console.log(data.message);
             return true;
         } else {
             return false;
         }
-        
-    } catch(err) {
+
+    } catch (err) {
         console.log(err);
         return false;
     }

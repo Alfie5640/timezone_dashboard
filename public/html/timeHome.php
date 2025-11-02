@@ -17,16 +17,16 @@
     <div id="header">
         <div id="username">
             <h1 id="name"></h1>
-            
+
             <h1 id="time">
             </h1>
         </div>
-        
+
         <div id="logoutContainer">
             <button id="logoutButton">Logout</button>
         </div>
     </div>
-    
+
     <div class="maincontent">
         <!-- Added timezone elements go here -->
 
@@ -72,17 +72,25 @@
                 })
                 .catch(err => console.error("Decode error:", err));
 
+            // --- Clock updater ---
             function updateClock() {
                 const now = new Date();
                 const formatted = now.toLocaleTimeString('en-GB', {
                     hour12: false
                 });
-                document.getElementById('time').textContent = formatted;
+
+                const mediaQuery = window.matchMedia("(max-width: 700px)");
+
+                if (!mediaQuery.matches) {
+                    document.getElementById('time').textContent = formatted;
+                }
             }
 
+            // Call once immediately, then every second
             updateClock();
             setInterval(updateClock, 1000);
 
+            // --- Populate timezone dropdown once ---
             const timezoneSelect = document.getElementById("timezoneSelect");
 
             if (typeof Intl.supportedValuesOf === "function") {
@@ -94,7 +102,6 @@
                     timezoneSelect.appendChild(option);
                 });
             }
-
         }
 
     </script>
